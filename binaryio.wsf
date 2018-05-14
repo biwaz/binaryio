@@ -1,0 +1,80 @@
+<job id="test">
+<comment>binaryio verification program</comment>
+<script language="VBScript" src="./binaryio.vbs"/>
+<script language="VBScript">
+class sample
+	public objBinaryIO, intbyte, intnum, lngnum, str, datetime, bool, dbl
+
+	private sub class_initialize
+		set objBinaryIO = new binaryio
+
+		intbyte = 0
+		intnum = 0
+		lngnum = clng(0)
+		str = ""
+		datetime = cdate("1970/01/01")
+		bool = false
+		str = ""
+		dbl = 0.0
+	end sub
+
+	public sub deserialize
+		objBinaryIO.deserialize_byte intbyte
+		objBinaryIO.deserialize_int intnum
+		objBinaryIO.deserialize_lng lngnum
+		objBinaryIO.deserialize_string str
+		objBinaryIO.deserialize_date datetime
+		objBinaryIO.deserialize_double dbl
+		objBinaryIO.deserialize_bool bool
+	end sub
+
+	public sub readbinaryfile(filepath)
+		objBinaryIO.readbinaryfile filepath
+		deserialize
+	end sub
+
+	public function serialize
+		objBinaryIO.serialize_byte intbyte
+		objBinaryIO.serialize_int intnum
+		objBinaryIO.serialize_lng lngnum
+		objBinaryIO.serialize_string str
+		objBinaryIO.serialize_date datetime
+		objBinaryIO.serialize_double dbl
+		objBinaryIO.serialize_bool bool
+	end function
+
+	public sub savebinarydata(filepath)
+		objBinaryIO.buffer = ""
+		serialize
+		objBinaryIO.savebinarydata filepath
+	end sub
+
+	public sub print
+		wscript.echo intbyte
+		wscript.echo intnum
+		wscript.echo lngnum
+		wscript.echo str
+		wscript.echo datetime
+		wscript.echo dbl
+		wscript.echo bool
+	end sub
+end class
+
+dim objsample
+
+set objsample = new sample
+objsample.intbyte = 123
+objsample.intnum = 12345
+objsample.lngnum = 123456789
+objsample.str = "hello, world! ‚Í‚¢"
+objsample.datetime = now()
+objsample.bool = true
+objsample.dbl = 3.14159265359
+objsample.savebinarydata wscript.scriptfullname & ".dat"
+
+set objsample = new sample
+objsample.readbinaryfile wscript.scriptfullname & ".dat"
+
+objsample.print
+</script>
+</job>
