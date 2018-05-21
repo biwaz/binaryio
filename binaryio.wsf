@@ -28,8 +28,8 @@ class sample
 		objBinaryIO.deserialize_bool bool
 	end sub
 
-	public sub readbinaryfile(filepath)
-		objBinaryIO.readbinaryfile filepath
+	public sub read(filepath)
+		objBinaryIO.buffer = readbinaryfile(filepath)
 		deserialize
 	end sub
 
@@ -43,10 +43,10 @@ class sample
 		objBinaryIO.serialize_bool bool
 	end function
 
-	public sub savebinarydata(filepath)
+	public sub save(filepath)
 		objBinaryIO.buffer = ""
 		serialize
-		objBinaryIO.savebinarydata filepath
+		savebinarydata filepath, objBinaryIO.buffer
 	end sub
 
 	public sub print
@@ -70,10 +70,10 @@ objsample.str = "hello, world! ‚Í‚¢"
 objsample.datetime = now()
 objsample.bool = true
 objsample.dbl = 3.14159265359
-objsample.savebinarydata wscript.scriptfullname & ".dat"
+objsample.save wscript.scriptfullname & ".dat"
 
 set objsample = new sample
-objsample.readbinaryfile wscript.scriptfullname & ".dat"
+objsample.read wscript.scriptfullname & ".dat"
 
 objsample.print
 </script>

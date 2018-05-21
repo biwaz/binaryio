@@ -10,52 +10,51 @@ objBinHex.dataType = "bin.hex"
 ' bin2hex objBinHex.nodetypedvalue = bytes : objBinHex.text
 ' hex2bin objBinHex.text = strtext : objBinHex.nodetypedvalue
 
+public function readbinaryfile(filepath)
+	objStream.type = 1
+	objStream.open
+	objStream.loadfromfile filepath
+	objBinHex.nodetypedvalue = objStream.read
+	objStream.close
+	readbinaryfile = objBinHex.text
+end function
+
+public sub savebinarydata(filepath, buffer)
+	objStream.type = 1
+	objStream.open
+	objBinHex.text = buffer
+	objStream.write objBinHex.nodetypedvalue
+	objStream.savetofile filepath, 2
+	objStream.flush
+	objStream.close
+end sub
+
+public function bytes2string(bytes)
+	objStream.open
+	objStream.type = 1
+	objStream.write bytes
+	objStream.position = 0
+	objStream.type = 2
+	bytes2string = objStream.readtext
+	objStream.close
+end function
+
+public function string2bytes(strtext)
+	objStream.open
+	objStream.type = 2
+	objStream.writetext strtext
+	objStream.position = 0
+	objStream.type = 1
+	string2bytes = objStream.read
+	objStream.close
+end function
+
 class binaryio
 	public buffer
 
 	private sub class_initialize
 		buffer = ""
 	end sub
-
-	public sub readbinaryfile(filepath)
-		objStream.type = 1
-		objStream.open
-		objStream.loadfromfile filepath
-		objBinHex.nodetypedvalue = objStream.read
-		objStream.close
-		buffer = objBinHex.text
-	end sub
-
-	public sub savebinarydata(filepath)
-		objStream.type = 1
-		objStream.open
-		objBinHex.text = buffer
-		objStream.write objBinHex.nodetypedvalue
-		objStream.savetofile filepath, 2
-		objStream.flush
-		objStream.close
-	end sub
-
-	public function bytes2string(bytes)
-		objStream.open
-		objStream.type = 1
-		objStream.write bytes
-		objStream.position = 0
-		objStream.type = 2
-		bytes2string = objStream.readtext
-		objStream.close
-	end function
-
-	public function string2bytes(strtext)
-		objStream.open
-		objStream.type = 2
-		objStream.writetext strtext
-		objStream.position = 0
-		objStream.type = 1
-		string2bytes = objStream.read
-		objStream.close
-	end function
-
 
 	public sub serialize_bool(varname)
 		if varname then buffer = buffer & "FF" else buffer = buffer & "00"
