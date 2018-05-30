@@ -1,52 +1,89 @@
-<job id="test">
+<job id="binaryio">
 <comment>binaryio verification program</comment>
-<script language="VBScript" src="./binaryio.vbs"/>
+<script language="VBScript" src="binaryio.vbs"/>
 <script language="VBScript">
+option explicit
+
 class sample
-	public objBinaryIO, intbyte, intnum, lngnum, str, datetime, bool, dbl
+	public objBinaryIO, intbyte, intnum, lngnum, str, uni, euc, datetime, bool, dbl
 
 	private sub class_initialize
 		set objBinaryIO = new binaryio
 
-		intbyte = 0
+		intbyte = cbyte(0)
 		intnum = 0
 		lngnum = clng(0)
 		str = ""
+		uni = ""
+		euc = ""
 		datetime = cdate("1970/01/01")
 		bool = false
-		str = ""
 		dbl = 0.0
 	end sub
 
 	public sub deserialize
-		objBinaryIO.deserialize_byte intbyte
-		objBinaryIO.deserialize_int intnum
-		objBinaryIO.deserialize_lng lngnum
-		objBinaryIO.deserialize_string str
-		objBinaryIO.deserialize_date datetime
-		objBinaryIO.deserialize_double dbl
-		objBinaryIO.deserialize_bool bool
+		with objBinaryIO
+			if true then
+				.deserialize intbyte
+				.deserialize intnum
+				.deserialize lngnum
+				.deserialize str
+				uni = objUTF8.getstring(.deserialize_bytes(-1))
+				euc = tostring("euc-jp", .deserialize_bytes(-1))
+				.deserialize datetime
+				.deserialize dbl
+				.deserialize bool
+			else
+				intbyte = .deserialize_byte
+				intnum = .deserialize_int
+				lngnum = .deserialize_lng
+				str = tostring(null, .deserialize_bytes(-1))
+				uni = objUTF8.getstring(.deserialize_bytes(-1))
+				euc = tostring("euc-jp", .deserialize_bytes(-1))
+				datetime = .deserialize_date
+				dbl = .deserialize_double
+				bool = .deserialize_bool
+			end if
+		end with
 	end sub
 
 	public sub read(filepath)
-		objBinaryIO.buffer = readbinaryfile(filepath)
+		objBinHex.nodetypedvalue = readbinaryfile(filepath)
+		objBinaryIO.buffer = objBinHex.text
 		deserialize
 	end sub
 
 	public function serialize
-		objBinaryIO.serialize_byte intbyte
-		objBinaryIO.serialize_int intnum
-		objBinaryIO.serialize_lng lngnum
-		objBinaryIO.serialize_string str
-		objBinaryIO.serialize_date datetime
-		objBinaryIO.serialize_double dbl
-		objBinaryIO.serialize_bool bool
+		with objBinaryIO
+			if true then
+				.serialize intbyte
+				.serialize intnum
+				.serialize lngnum
+				.serialize str
+				.serialize_bytes objUTF8.getbytes_4(uni)
+				.serialize_bytes fromstring("euc-jp", euc)
+				.serialize datetime
+				.serialize dbl
+				.serialize bool
+			else
+				.serialize_byte intbyte
+				.serialize_int intnum
+				.serialize_lng lngnum
+				.serialize_bytes fromstring(null, str)
+				.serialize_bytes objUTF8.getbytes_4(uni)
+				.serialize_bytes fromstring("euc-jp", euc)
+				.serialize_date datetime
+				.serialize_double dbl
+				.serialize_bool bool
+			end if
+		end with
 	end function
 
 	public sub save(filepath)
 		objBinaryIO.buffer = ""
 		serialize
-		savebinarydata filepath, objBinaryIO.buffer
+		objBinHex.text = objBinaryIO.buffer
+		savebinarydata filepath, objBinHex.nodetypedvalue
 	end sub
 
 	public sub print
@@ -54,6 +91,8 @@ class sample
 		wscript.echo intnum
 		wscript.echo lngnum
 		wscript.echo str
+		wscript.echo uni
+		wscript.echo euc
 		wscript.echo datetime
 		wscript.echo dbl
 		wscript.echo bool
@@ -63,18 +102,24 @@ end class
 dim objsample
 
 set objsample = new sample
-objsample.intbyte = 123
-objsample.intnum = 12345
-objsample.lngnum = 123456789
-objsample.str = "hello, world! はい"
-objsample.datetime = now()
-objsample.bool = true
-objsample.dbl = 3.14159265359
-objsample.save wscript.scriptfullname & ".dat"
+with objsample
+	.intbyte = cbyte(123)
+	.intnum = 12345
+	.lngnum = 123456789
+	.str = "hello, world! はい"
+	.uni = "ユニコード"
+	.euc = "いろんな文字コード"
+	.datetime = now()
+	.bool = true
+	.dbl = 3.14159265359
+	.save wscript.scriptfullname & ".dat"
+end with
 
 set objsample = new sample
-objsample.read wscript.scriptfullname & ".dat"
-
-objsample.print
+with objsample
+	.intbyte = cbyte(0)
+	.read wscript.scriptfullname & ".dat"
+	.print
+end with
 </script>
 </job>
